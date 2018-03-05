@@ -29,6 +29,15 @@ class Mpu9250
   private:
     //
   public:
+  
+    Mpu9250();
+    ~Mpu9250();
+    void setupMpu9250(uint8_t sAscale, uint8_t sGscale);
+    void setupMpu9250();
+    void readMpu9250Data();
+    float ax, ay, az, gx, gy, gz;   // Stores final value of accel and gyro 3 axes
+    float yaw_rate;
+  protected:
     void writeByte(uint8_t address, uint8_t subAddress, uint8_t data);
     uint8_t readByte(uint8_t address, uint8_t subAddress);
     void readBytes(uint8_t address, uint8_t subAddress, uint8_t count, uint8_t * dest);
@@ -38,19 +47,14 @@ class Mpu9250
     void getAres();
     void processMpu9250Data();
     void readMpu9250Raw();
-    void readMpu9250Data();
     void isOnline();
     void initMPU9250();
-    void setupMpu9250(uint8_t sAscale, uint8_t sGscale);
-    float ax, ay, az, gx, gy, gz;   // Stores final value of accel and gyro 3 axes
-    float yaw_rate;
-  protected:
     bool connected;
     uint8_t Ascale;                 // Accelerometer résolution
     uint8_t Gscale;                 // Gyroscope résolution
     float aRes, gRes;               // scale resolutions per LSB for the sensors
     int16_t accelValue[3];          // Stores the 16-bit signed accelerometer sensor output
     int16_t gyroValue[3];           // Stores the 16-bit signed gyro sensor output
-}
+};
 
 #endif

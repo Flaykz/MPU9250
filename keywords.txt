@@ -6,35 +6,25 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-nRF24	KEYWORD1	nRF24
-v202	KEYWORD1	v202
+Mpu9250	KEYWORD1	Mpu9250
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
 
-init	        KEYWORD2
-run 	        KEYWORD2
-setTXId	        KEYWORD2
-command	        KEYWORD2
-setPins	        KEYWORD2
-setCeLow 	    KEYWORD2
-setCeHigh	    KEYWORD2
-setCsLow    	KEYWORD2
-setCsHigh	    KEYWORD2
-switchFreq 	    KEYWORD2
-rxFlag	        KEYWORD2
-resetRxFlag	    KEYWORD2
-rxEmpty	        KEYWORD2
-readPayload 	KEYWORD2
-writePayload	KEYWORD2
-rxMode      	KEYWORD2
-txMode      	KEYWORD2
-flushRx 	    KEYWORD2
-flushTx 	    KEYWORD2
-activate        KEYWORD2
-readRegister    KEYWORD2
-writeRegister   KEYWORD2
+setupMpu9250	        KEYWORD2
+readMpu9250Data 	    KEYWORD2
+writeByte	            KEYWORD2
+readByte	            KEYWORD2
+readBytes	            KEYWORD2
+readAccelData           KEYWORD2
+readGyroData	        KEYWORD2
+getGres    	            KEYWORD2
+getAres	                KEYWORD2
+processMpu9250Data 	    KEYWORD2
+readMpu9250Raw	        KEYWORD2
+isOnline	            KEYWORD2
+initMPU9250	            KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

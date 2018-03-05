@@ -164,3 +164,16 @@ void Mpu9250::setupMpu9250(uint8_t sAscale, uint8_t sGscale) {
     yaw_rate = 0;
   }
 }
+
+void Mpu9250::setupMpu9250() {
+  Wire.begin();
+  Ascale = AFS_2G;
+  Gscale = GFS_250DPS;
+  // Is device connected
+  isOnline();
+  if (connected) {
+    initMPU9250();
+  } else {
+    yaw_rate = 0;
+  }
+}
