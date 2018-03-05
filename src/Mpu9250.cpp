@@ -1,39 +1,18 @@
-#ifndef mpu9250_h
-#define mpu9250_h
+#include <Wire.h>
+#include "Mpu9250.h"
 
-#include "Arduino.h"
+Mpu9250::Mpu9250()
+{
+  connected = false;
+  yaw_rate = 0;
+}
 
-#define MPU9250_ADDRESS   0x68 // Address of MPU9250
-#define WHO_AM_I_MPU9250  0x75 // Should return 0x71
-#define PWR_MGMT_1        0x6B // Device defaults to the SLEEP mode
-#define PWR_ON            0x00 // Activate device
-#define ACCEL_CONFIG      0x1C
-#define GYRO_CONFIG       0x1B
-#define CONFIG            0x1A
-#define ACCEL_XOUT_H      0x3B
-#define GYRO_XOUT_H       0x43
+Mpu9250::~Mpu9250()
+{
+  //
+}
 
-#define AFS_2G            0x00
-#define AFS_4G            0x01
-#define AFS_8G            0x10
-#define AFS_16G           0x11
-#define GFS_250DPS        0x00
-#define GFS_500DPS        0x01
-#define GFS_1000DPS       0x10
-#define GFS_2000DPS       0x11
-
-#define READ_FREQUENCY    8000
-
-bool connected = false;
-uint8_t Ascale;                 // Accelerometer résolution
-uint8_t Gscale;                 // Gyroscope résolution
-float aRes, gRes;               // scale resolutions per LSB for the sensors
-int16_t accelValue[3];          // Stores the 16-bit signed accelerometer sensor output
-int16_t gyroValue[3];           // Stores the 16-bit signed gyro sensor output
-float ax, ay, az, gx, gy, gz;   // Stores final value of accel and gyro 3 axes
-float yaw_rate = 0;
-
-void writeByte(uint8_t address, uint8_t subAddress, uint8_t data)
+void Mpu9250::writeByte(uint8_t address, uint8_t subAddress, uint8_t data)
 {
   Wire.beginTransmission(address);  // Initialize the Tx buffer
   Wire.write(subAddress);           // Put slave register address in Tx buffer
@@ -41,7 +20,7 @@ void writeByte(uint8_t address, uint8_t subAddress, uint8_t data)
   Wire.endTransmission();           // Send the Tx buffer
 }
 
-uint8_t readByte(uint8_t address, uint8_t subAddress)
+uint8_t Mpu9250::readByte(uint8_t address, uint8_t subAddress)
 {
   uint8_t data;                            // `data` will store the register data   
   Wire.beginTransmission(address);         // Initialize the Tx buffer
@@ -52,7 +31,7 @@ uint8_t readByte(uint8_t address, uint8_t subAddress)
   return data;                             // Return data read from slave register
 }
 
-void readBytes(uint8_t address, uint8_t subAddress, uint8_t count, uint8_t * dest)
+void Mpu9250::readBytes(uint8_t address, uint8_t subAddress, uint8_t count, uint8_t * dest)
 {  
   Wire.beginTransmission(address);   // Initialize the Tx buffer
   Wire.write(subAddress);            // Put slave register address in Tx buffer
@@ -64,7 +43,7 @@ void readBytes(uint8_t address, uint8_t subAddress, uint8_t count, uint8_t * des
   }
 }
 
-void readAccelData(int16_t * destination) {
+void Mpu9250::readAccelData(int16_t * destination) {
   uint8_t rawData[6];
   readBytes(MPU9250_ADDRESS, ACCEL_XOUT_H, 6, &rawData[0]);
   destination[0] = ((int16_t)rawData[0] << 8) | rawData[1] ;  // Turn the MSB and LSB into a signed 16-bit value
@@ -72,7 +51,7 @@ void readAccelData(int16_t * destination) {
   destination[2] = ((int16_t)rawData[4] << 8) | rawData[5] ; 
 }
 
-void readGyroData(int16_t * destination) {
+void Mpu9250::readGyroData(int16_t * destination) {
   uint8_t rawData[6];
   readBytes(MPU9250_ADDRESS, GYRO_XOUT_H, 6, &rawData[0]);
   destination[0] = ((int16_t)rawData[0] << 8) | rawData[1] ;  // Turn the MSB and LSB into a signed 16-bit value
@@ -80,7 +59,7 @@ void readGyroData(int16_t * destination) {
   destination[2] = ((int16_t)rawData[4] << 8) | rawData[5] ; 
 }
 
-void getGres() {
+void Mpu9250::getGres() {
   switch (Gscale)
   {
     // Here's a bit of an algorith to calculate DPS/(ADC tick) based on that 2-bit value:
@@ -99,7 +78,7 @@ void getGres() {
   }
 }
 
-void getAres() {
+void Mpu9250::getAres() {
   switch (Ascale)
   {
     // Here's a bit of an algorith to calculate DPS/(ADC tick) based on that 2-bit value:
@@ -118,7 +97,7 @@ void getAres() {
   }
 }
 
-void processMpu9250Data() {
+void Mpu9250::processMpu9250Data() {
   // Now we'll calculate the accleration value into actual g's
   ax = (float)accelValue[0]*aRes; // - accelBias[0];  // get actual g value, this depends on scale being set
   ay = (float)accelValue[1]*aRes; // - accelBias[1];   
@@ -131,12 +110,12 @@ void processMpu9250Data() {
   yaw_rate = int(gz);
 }
 
-void readMpu9250Raw() {
+void Mpu9250::readMpu9250Raw() {
   readAccelData(accelValue);
   readGyroData(gyroValue);
 }
 
-void readMpu9250Data() {
+void Mpu9250::readMpu9250Data() {
   if (connected) {
     static unsigned long lastReading;
     if (micros() - lastReading >= READ_FREQUENCY) {           // Read the data every 8000us (equals 125Hz)
@@ -148,18 +127,22 @@ void readMpu9250Data() {
   }
 }
 
-void isOnline() {
+void Mpu9250::isOnline() {
   uint8_t c = readByte(MPU9250_ADDRESS, WHO_AM_I_MPU9250);  // Read WHO_AM_I register for MPU-9250
   if (c == 0x71) {
-    Serial.println("MPU9250 is online...");
+    if (Serial) {
+      Serial.println("MPU9250 is online...");
+    }
     connected = true;
   } else {
-    Serial.println("MPU9250 is not connected...");
+    if (Serial) {
+      Serial.println("MPU9250 is not connected...");
+    }
     connected = false;
   }
 }
 
-void initMPU9250() {
+void Mpu9250::initMPU9250() {
   // Activate device
   writeByte(MPU9250_ADDRESS, PWR_MGMT_1, PWR_ON);                 // Activate the MPU-9250
   delay(100);                                                   // Wait for all registers to reset 
@@ -169,7 +152,7 @@ void initMPU9250() {
   getGres();
 }
 
-void setupMpu9250(uint8_t sAscale, uint8_t sGscale) {
+void Mpu9250::setupMpu9250(uint8_t sAscale, uint8_t sGscale) {
   Wire.begin();
   Ascale = sAscale;
   Gscale = sGscale;
@@ -181,7 +164,3 @@ void setupMpu9250(uint8_t sAscale, uint8_t sGscale) {
     yaw_rate = 0;
   }
 }
-
-
-
-#endif
